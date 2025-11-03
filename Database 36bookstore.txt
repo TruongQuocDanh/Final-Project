@@ -1,0 +1,46 @@
+-- Database: 36bookstore
+
+-- DROP DATABASE IF EXISTS "36bookstore";
+
+CREATE DATABASE "36bookstore"
+    WITH
+    OWNER = postgres
+    ENCODING = 'UTF8'
+    LC_COLLATE = 'English_United States.1252'
+    LC_CTYPE = 'English_United States.1252'
+    LOCALE_PROVIDER = 'libc'
+    TABLESPACE = pg_default
+    CONNECTION LIMIT = -1
+    IS_TEMPLATE = False;
+
+-- Bảng lưu thông tin sách
+CREATE TABLE books (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    author VARCHAR(255) NOT NULL,
+    category VARCHAR(100),
+    price NUMERIC(10,2) CHECK (price > 0),
+    description TEXT,
+    cover_image VARCHAR(255),
+    stock_quantity INT DEFAULT 0,
+    publisher VARCHAR(255),
+    date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Bảng người dùng (nếu cần)
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(50) DEFAULT 'customer',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Bảng giỏ hàng (nếu thêm module sau này)
+CREATE TABLE cart (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    book_id INT REFERENCES books(id) ON DELETE CASCADE,
+    quantity INT DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
