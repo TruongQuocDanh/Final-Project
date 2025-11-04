@@ -62,22 +62,31 @@ export const listBooks = async (req, res) => {
     const offset = (Number(page) - 1) * Number(limit);
 
     const { rows, count } = await Book.findAndCountAll({
-      offset, limit: Number(limit),
-      order: [[sortBy, order]]
+      offset,
+      limit: Number(limit),
+      order: [[sortBy, order]],
     });
 
-    // (US2 AC8) if empty
-    if (count === 0) return res.json({ message: "No books available.", data: [], total: 0 });
+    // (US2 AC8)
+    if (count === 0)
+      return res.json({ message: "No books available.", data: [], total: 0 });
+
+    const totalPages = Math.ceil(count / Number(limit));
+    const remainingPages = Math.max(totalPages - Number(page), 0);
 
     return res.json({
       data: rows,
       total: count,
       page: Number(page),
-      pages: Math.ceil(count / Number(limit))
+      pages: totalPages,
+      remainingPages, // 👈 thêm dòng này
     });
   } catch (err) {
     // (US2 AC12)
-    return res.status(500).json({ message: "Could not load the product list. Please try again later.", error: err.message });
+    return res.status(500).json({
+      message: "Could not load the product list. Please try again later.",
+      error: err.message,
+    });
   }
 };
 
