@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import {
   Layout,
   Button,
-  Input,
-  Select,
   Space,
   message,
   Pagination,
@@ -11,29 +9,33 @@ import {
 } from "antd";
 import {
   PlusOutlined,
-  SearchOutlined,
-  FilterOutlined,
   MenuOutlined,
   CloseOutlined,
 } from "@ant-design/icons";
 import Sidebar from "../components/SideBar";
 import BookList from "../components/BookList";
-import AddBookModal from "../components/AddBookModal";
+import AddBookModal from "../components/AddNewBook/AddBookModal";
+import SearchFilterBar from "../components/SearchFilterBar";
+import BookDetailsModal from "../components/BookDetails/BookDetailsModal"; // 🆕 Import modal
 
 const { Header, Content } = Layout;
-const { Option } = Select;
 
 export default function Dashboard() {
   const [books, setBooks] = useState([]);
   const [collapsed, setCollapsed] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false); // 🆕 For details modal
+  const [selectedBook, setSelectedBook] = useState(null); // 🆕 Selected book data
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [appliedFilters, setAppliedFilters] = useState(null);
 
-  const booksPerPage = 8;
+  const isSearchingOrFiltered =
+    searchTerm.trim() !== "" || appliedFilters !== null;
+  const booksPerPage = isSearchingOrFiltered ? 20 : 8;
 
+  // 🟢 Fake data load
   useEffect(() => {
     setLoading(true);
     setTimeout(() => {
@@ -42,80 +44,44 @@ export default function Dashboard() {
           id: 1,
           title: "Cooking Made Easy",
           author: "Emily Clark",
-          category: "Learning, Study",
+          category: "Learning",
+          price: 45,
+          quantity: 10,
+          description: "Simple recipes for busy people.",
           image: "https://placehold.co/200x250",
           status: "In Stock",
+          createdAt: "2025-11-01",
         },
         {
           id: 2,
           title: "Mystery of the Lost Island",
           author: "Jane Smith",
-          category: "Learning, Study",
+          category: "Thriller",
+          price: 60,
+          quantity: 0,
+          description: "A thrilling journey full of mysteries.",
           image: "https://placehold.co/200x250",
           status: "Out of Stock",
+          createdAt: "2025-10-25",
         },
         {
           id: 3,
           title: "The Hidden Kingdom",
           author: "Laura Hill",
           category: "Fantasy",
+          price: 80,
+          quantity: 5,
+          description: "A magical world awaits beyond the mist.",
           image: "https://placehold.co/200x250",
           status: "Inactive",
-        },
-        {
-          id: 4,
-          title: "Journey to the West",
-          author: "Wukong",
-          category: "Classic",
-          image: "https://placehold.co/200x250",
-          status: "In Stock",
-        },
-        {
-          id: 5,
-          title: "Digital Fortress",
-          author: "Dan Brown",
-          category: "Thriller",
-          image: "https://placehold.co/200x250",
-          status: "In Stock",
-        },
-        {
-          id: 6,
-          title: "Design Thinking",
-          author: "Tim Brown",
-          category: "Learning",
-          image: "https://placehold.co/200x250",
-          status: "Out of Stock",
-        },
-        {
-          id: 7,
-          title: "Harry Potter",
-          author: "J.K. Rowling",
-          category: "Fantasy",
-          image: "https://placehold.co/200x250",
-          status: "In Stock",
-        },
-        {
-          id: 8,
-          title: "Algorithms to Live By",
-          author: "Brian Christian",
-          category: "Science",
-          image: "https://placehold.co/200x250",
-          status: "Inactive",
-        },
-        {
-          id: 9,
-          title: "The Hobbit",
-          author: "J.R.R. Tolkien",
-          category: "Fantasy",
-          image: "https://placehold.co/200x250",
-          status: "In Stock",
+          createdAt: "2025-09-15",
         },
       ]);
       setLoading(false);
-    }, 1500); // simulate 1.5s loading
+    }, 1500);
   }, []);
 
-  // Add new book
+  // 🟢 Add new book
   const handleAddBook = (newBook) => {
     const id = books.length + 1;
     const bookData = {
@@ -123,35 +89,87 @@ export default function Dashboard() {
       title: newBook.title,
       author: newBook.author,
       category: newBook.category,
+      price: newBook.price || 0,
+      quantity: newBook.quantity || 0,
+      description: newBook.description || "",
       image: newBook.image?.thumbUrl || "https://placehold.co/200x250",
       status: "In Stock",
+      createdAt: new Date().toISOString(),
     };
-
     setBooks((prev) => [bookData, ...prev]);
     setIsModalOpen(false);
     message.success("Book added successfully!");
   };
 
-  // 🟢 Search + Filter
-  const filteredBooks = books.filter((book) => {
-    const matchesSearch = book.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus ? book.status === filterStatus : true;
-    return matchesSearch && matchesStatus;
-  });
+  // 🟢 View details
+  const handleViewBook = (book) => {
+    setSelectedBook(book);
+    setIsDetailsOpen(true);
+  };
 
+  // 🟢 Save (edit)
+  const handleUpdateBook = (updatedBook) => {
+    setBooks((prev) =>
+      prev.map((b) => (b.id === updatedBook.id ? updatedBook : b))
+    );
+    setSelectedBook(updatedBook);
+  };
+
+  // 🟢 Delete
+  const handleDeleteBook = (bookToDelete) => {
+    setBooks((prev) => prev.filter((b) => b.id !== bookToDelete.id));
+    setIsDetailsOpen(false);
+  };
+
+  // 🟢 Apply & Clear Filters
+  const handleFilterApply = (filters) => {
+    setAppliedFilters(filters);
+    setCurrentPage(1);
+  };
+
+  const handleFilterClear = () => {
+    setAppliedFilters(null);
+    setCurrentPage(1);
+  };
+
+  // 🟢 Search logic
+  const filteredBooks = books.filter((book) => {
+    const keyword = searchTerm.toLowerCase();
+    const matchesSearch =
+      book.title.toLowerCase().includes(keyword) ||
+      book.author.toLowerCase().includes(keyword);
+
+    let matchesCategory = true;
+    let matchesStatus = true;
+    let matchesAuthor = true;
+    let matchesPrice = true;
+
+    if (appliedFilters) {
+      const { category, status, author, minPrice, maxPrice } = appliedFilters;
+      if (category?.length)
+        matchesCategory = category.includes(book.category);
+      if (status?.length) matchesStatus = status.includes(book.status);
+      if (author) matchesAuthor = book.author === author;
+      if (minPrice !== undefined && maxPrice !== undefined)
+        matchesPrice =
+          book.price >= minPrice && book.price <= maxPrice;
+    }
+
+    return (
+      matchesSearch &&
+      matchesCategory &&
+      matchesStatus &&
+      matchesAuthor &&
+      matchesPrice
+    );
+  });
 
   const totalBooks = filteredBooks.length;
   const startIndex = (currentPage - 1) * booksPerPage;
-  const currentBooks = filteredBooks.slice(
-    startIndex,
-    startIndex + booksPerPage
-  );
+  const currentBooks = filteredBooks.slice(startIndex, startIndex + booksPerPage);
 
   return (
     <Layout style={{ minHeight: "100vh", background: "#eaf2ff" }}>
-      {/* Sidebar */}
       <Sidebar collapsed={collapsed} />
 
       <Layout style={{ background: "#eaf2ff" }}>
@@ -178,32 +196,18 @@ export default function Dashboard() {
               }}
             />
             <h1 style={{ fontSize: "22px", fontWeight: 700, margin: 0 }}>
-              List of Book
+              List of Books
             </h1>
           </Space>
 
           <Space size="middle">
-            <Input
-              placeholder="Search book..."
-              prefix={<SearchOutlined />}
-              style={{ width: 200 }}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+            <SearchFilterBar
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              onSearchSubmit={() => setCurrentPage(1)}
+              onFilterApply={handleFilterApply}
+              onFilterClear={handleFilterClear}
             />
-
-            <Select
-              placeholder="Filter status"
-              suffixIcon={<FilterOutlined />}
-              style={{ width: 150 }}
-              allowClear
-              value={filterStatus || undefined}
-              onChange={(value) => setFilterStatus(value)}
-            >
-              <Option value="In Stock">In Stock</Option>
-              <Option value="Out of Stock">Out of Stock</Option>
-              <Option value="Inactive">Inactive</Option>
-            </Select>
-
             <Button
               type="primary"
               icon={<PlusOutlined />}
@@ -241,11 +245,15 @@ export default function Dashboard() {
                 fontWeight: 500,
               }}
             >
-              There are currently no books.
+              {searchTerm
+                ? "No books or authors found."
+                : appliedFilters
+                ? "No books match the current filters."
+                : "There are currently no books."}
             </div>
           ) : (
             <>
-              <BookList books={currentBooks} />
+              <BookList books={currentBooks} onViewBook={handleViewBook} />
               <div
                 style={{
                   display: "flex",
@@ -256,7 +264,7 @@ export default function Dashboard() {
               >
                 <Pagination
                   current={currentPage}
-                  total={totalBooks}
+                  total={filteredBooks.length}
                   pageSize={booksPerPage}
                   onChange={(page) => setCurrentPage(page)}
                   showSizeChanger={false}
@@ -271,6 +279,15 @@ export default function Dashboard() {
           open={isModalOpen}
           onCancel={() => setIsModalOpen(false)}
           onSave={handleAddBook}
+        />
+
+        {/* 🆕 Book Details Modal */}
+        <BookDetailsModal
+          open={isDetailsOpen}
+          onCancel={() => setIsDetailsOpen(false)}
+          book={selectedBook}
+          onSave={handleUpdateBook}
+          onDelete={handleDeleteBook}
         />
       </Layout>
     </Layout>
