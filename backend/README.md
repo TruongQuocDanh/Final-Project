@@ -1,21 +1,41 @@
-# Bookstore API (Express + PostgreSQL + Swagger)
+# Bookstore Backend (Express + PostgreSQL)
 
-## Quick start
-```bash
-# 1) Install deps
-npm install
+This is a minimal backend for the Bookstore project with:
+- Express.js
+- PostgreSQL (pg)
+- Image upload + processing (multer + sharp) to `src/photo/`
+- Swagger UI at `/api-docs`
+- Tables: books, authors, categories
+- SQL functions & procedures in `init.sql` for optimized search and stock management
 
-# 2) Copy env
-cp .env.example .env
-# then edit .env with your PostgreSQL credentials
+## Setup
 
-# 3) Run in dev
-npm run dev
-```
+1. Install dependencies:
 
-Swagger UI will be at: http://localhost:5000/docs
+   ```bash
+   npm install
+   ```
 
-## Notes
-- Uploads are saved into `/uploads` (created automatically).
-- Sequelize `sync()` will auto-create tables (dev only).
-- Swagger docs include explicit mapping to Acceptance Criteria (AC) for US1, US2, US3, US18, US19.
+2. Create database and run SQL:
+
+   - Create a database named `bookstore`
+   - Run `init.sql` in pgAdmin or psql
+
+3. Configure environment:
+
+   - Copy `.env.example` to `.env`
+   - Update DB credentials if needed
+
+4. Start server:
+
+   ```bash
+   npm run dev
+   ```
+
+5. Test:
+
+   - Open Swagger UI: http://localhost:5000/api-docs
+   - Example endpoints:
+     - `GET /api/books`
+     - `POST /api/books` (multipart/form-data with field `image`)
+     - `GET /photo/{filename}` – served from `src/photo/`

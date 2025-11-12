@@ -24,7 +24,7 @@ export default function AddBookModal({ open, onCancel, onSave }) {
   const [authors, setAuthors] = useState([]);
   const [categories, setCategories] = useState([]);
 
-  // 🟢 Load authors & categories when modal opens
+  // 🟢 Load authors & categories
   useEffect(() => {
     if (open) {
       loadAuthors();
@@ -37,7 +37,7 @@ export default function AddBookModal({ open, onCancel, onSave }) {
       const data = await getAuthors();
       setAuthors(data);
     } catch {
-      message.error("Failed to load authors.");
+      message.error("Failed to load authors");
     }
   };
 
@@ -46,11 +46,11 @@ export default function AddBookModal({ open, onCancel, onSave }) {
       const data = await getCategories();
       setCategories(data);
     } catch {
-      message.error("Failed to load categories.");
+      message.error("Failed to load categories");
     }
   };
 
-  // ✅ Validate and preview image
+  // ✅ Validate image
   const beforeUpload = (file) => {
     const isValidType =
       file.type === "image/jpeg" || file.type === "image/png";
@@ -68,38 +68,38 @@ export default function AddBookModal({ open, onCancel, onSave }) {
     const preview = URL.createObjectURL(file);
     setPreviewUrl(preview);
     setFileList([file]);
-    return false; // prevent auto-upload
+    return false; // prevent auto upload
   };
 
-  // ✅ Save handler (send real FormData)
-  const handleSave = () => {
-    form
-      .validateFields()
-      .then((values) => {
-        const formData = new FormData();
-        formData.append("title", values.title);
-        formData.append("description", values.description || "");
-        formData.append("price", values.price);
-        formData.append("quantity", values.quantity || 0);
-        formData.append("status", values.status || "In Stock");
-        formData.append("author_id", values.author_id);
-        formData.append("category_id", values.category_id);
+  // ✅ Save handler
+const handleSave = () => {
+  form
+    .validateFields()
+    .then((values) => {
+      const formData = new FormData();
+      formData.append("title", values.title);
+      formData.append("description", values.description || "");
+      formData.append("price", values.price);
+      formData.append("quantity", values.quantity || 0);
+      formData.append("status", values.status || "In Stock");
+      formData.append("author_id", values.author_id);
+      formData.append("category_id", values.category_id);
 
-        if (fileList[0]) {
-          formData.append("image", fileList[0]);
-        }
+      if (fileList[0]) {
+        formData.append("image", fileList[0]);  // file thật
+      }
 
-        onSave(formData);
-        form.resetFields();
-        setFileList([]);
-        setPreviewUrl(null);
-      })
-      .catch(() => {
-        message.error("Please fill in all required fields.");
-      });
-  };
+      onSave(formData);          // 👈 Gửi thẳng FormData cho Dashboard
+      form.resetFields();
+      setFileList([]);
+      setPreviewUrl(null);
+    })
+    .catch(() => {
+      message.error("Please fill in all required fields.");
+    });
+};
 
-  // ✅ Clear all inputs
+
   const handleClear = () => {
     form.resetFields();
     setFileList([]);
@@ -134,16 +134,15 @@ export default function AddBookModal({ open, onCancel, onSave }) {
               <Form.Item
                 label={
                   <>
-                    Book Title<span style={{ color: "red" }}> *</span>
+                    Book Name<span style={{ color: "red" }}> *</span>
                   </>
                 }
                 name="title"
-                rules={[{ required: true, message: "Please enter Book Title." }]}
+                rules={[{ required: true, message: "Please enter Book Name." }]}
               >
-                <Input placeholder="Enter Book Title" />
+                <Input placeholder="Enter Book Name" />
               </Form.Item>
 
-              {/* Author from API */}
               <Form.Item
                 label={
                   <>
@@ -162,7 +161,6 @@ export default function AddBookModal({ open, onCancel, onSave }) {
                 </Select>
               </Form.Item>
 
-              {/* Category from API */}
               <Form.Item
                 label={
                   <>
@@ -193,23 +191,7 @@ export default function AddBookModal({ open, onCancel, onSave }) {
                 <Input type="number" min={1} placeholder="Enter Price" />
               </Form.Item>
 
-              <Form.Item
-                label="Quantity"
-                name="quantity"
-                rules={[
-                  {
-                    validator: (_, value) =>
-                      value === undefined ||
-                      value === "" ||
-                      (Number(value) >= 0 &&
-                        Number.isInteger(Number(value)))
-                        ? Promise.resolve()
-                        : Promise.reject(
-                            new Error("Please enter a valid positive integer.")
-                          ),
-                  },
-                ]}
-              >
+              <Form.Item label="Quantity" name="quantity">
                 <Input type="number" min={0} placeholder="Enter Quantity" />
               </Form.Item>
 
@@ -237,7 +219,7 @@ export default function AddBookModal({ open, onCancel, onSave }) {
               </Form.Item>
             </Col>
 
-            {/* Right Column – Cover Image */}
+            {/* Cover Image */}
             <Col xs={24} md={10} className="upload-section">
               <p className="upload-title">Cover Image</p>
               <div className="upload-box">

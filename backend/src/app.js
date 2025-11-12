@@ -1,46 +1,54 @@
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import swaggerUi from "swagger-ui-express";
-import swaggerJSDoc from "swagger-jsdoc";
+import fs from "fs";
 
-import sequelize from "./config/db.js";
-import "./models/book.model.js";
-import bookRoutes from "./routes/book.routes.js";
+import bookRoutes from "./routes/bookRoutes.js";
+import authorRoutes from "./routes/authorRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
+import { notFoundHandler, errorHandler } from "./errorMiddleware.js";
+import { testDbConnection } from "./config/db.js";
 
-dotenv.config();
-const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const projectRoot = path.resolve(__dirname, "..");
+
+const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
+app.use(express.urlencoded({ extended: true }));
 
-// Swagger setup
-const swaggerSpec = swaggerJSDoc({
-  definition: {
-    openapi: "3.0.1",
-    info: {
-      title: "Bookstore API",
-      version: "1.0.0",
-      description:
-        "Swagger documentation with explicit mapping to Acceptance Criteria (US1, US2, US3, US18, US19)."
-    },
-    servers: [{ url: "http://localhost:" + (process.env.PORT || 5000) }]
-  },
-  apis: [path.join(__dirname, "routes", "*.js")]
+// Static folders for images
+app.use("/photo", express.static(path.join(projectRoot, "src", "photo")));
+app.use("/uploads", express.static(path.join(projectRoot, "src", "uploads")));
+
+// Swagger docs
+const swaggerPath = path.join(projectRoot, "src", "docs", "swagger.json");
+let swaggerDocument = {};
+if (fs.existsSync(swaggerPath)) {
+  swaggerDocument = JSON.parse(fs.readFileSync(swaggerPath, "utf-8"));
+}
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+// Simple health check
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok" });
 });
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Routes
 app.use("/api/books", bookRoutes);
+app.use("/api/authors", authorRoutes);
+app.use("/api/categories", categoryRoutes);
 
-// DB sync (dev only)
-sequelize.sync().then(() => {
-  console.log("Sequelize synced");
-}).catch(err => console.error("Sequelize sync error:", err));
+// Error handling
+app.use(notFoundHandler);
+app.use(errorHandler);
+
+// Test DB connection on startup
+testDbConnection();
 
 export default app;

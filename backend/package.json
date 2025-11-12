@@ -1,23 +1,21 @@
 {
-  "name": "bookstore-api",
+  "name": "bookstore-backend",
   "version": "1.0.0",
-  "description": "Bookstore backend using Express, Sequelize (PostgreSQL) with Swagger docs mapped to Acceptance Criteria (US1, US2, US3, US18, US19).",
+  "description": "Express + PostgreSQL backend for Bookstore project with image upload and Swagger docs",
+  "main": "src/server.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon server.js",
-    "start": "node server.js",
-    "lint": "echo \"No linter configured\""
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "multer": "^1.4.5-lts.1",
-    "pg": "^8.11.5",
-    "pg-hstore": "^2.3.4",
-    "sequelize": "^6.37.3",
-    "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "dotenv": "^16.4.0",
+    "express": "^4.19.0",
+    "multer": "^2.0.2",
+    "pg": "^8.11.0",
+    "sharp": "^0.33.0",
+    "swagger-ui-express": "^5.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
