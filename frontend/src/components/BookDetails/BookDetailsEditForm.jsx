@@ -7,6 +7,7 @@ import {
   Button,
   Image,
   Upload,
+  Checkbox,
   message,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
@@ -48,7 +49,7 @@ export default function BookDetailsEditForm({ book, onSave, onCancelEdit }) {
     }
   };
 
-  // 🟢 Validate and preview image
+  // 🟢 Validate & preview image
   const beforeUpload = (file) => {
     const isValid = file.type === "image/jpeg" || file.type === "image/png";
     if (!isValid) {
@@ -66,17 +67,24 @@ export default function BookDetailsEditForm({ book, onSave, onCancelEdit }) {
     return false;
   };
 
-  // 🟢 Handle save (prepare FormData)
+  // 🟢 Handle Save
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
+
+      // 🔥 Convert Checkbox → status string
+      const statusValue = values.status
+        ? "Inactive"
+        : values.quantity > 0
+        ? "In Stock"
+        : "Out of Stock";
 
       const formData = new FormData();
       formData.append("title", values.title);
       formData.append("description", values.description || "");
       formData.append("price", values.price);
       formData.append("quantity", values.quantity || 0);
-      formData.append("status", values.status);
+      formData.append("status", statusValue);
       formData.append("author_id", values.author_id);
       formData.append("category_id", values.category_id);
 
@@ -84,9 +92,14 @@ export default function BookDetailsEditForm({ book, onSave, onCancelEdit }) {
         formData.append("image", fileList[0]);
       }
 
-      // gửi lại dữ liệu lên Dashboard để gọi update API
-      onSave({ id: book.id, ...values, imageFile: fileList[0], formData });
-      message.success("Book saved successfully!");
+      onSave({
+        id: book.id,
+        ...values,
+        status: statusValue,
+        imageFile: fileList[0],
+        formData,
+      });
+
     } catch (err) {
       message.error("Please check the fields and try again.");
     }
@@ -103,12 +116,14 @@ export default function BookDetailsEditForm({ book, onSave, onCancelEdit }) {
         price: book.price,
         quantity: book.quantity,
         description: book.description,
-        status: book.status,
+        status: book.status === "Inactive", // 🔥 Checkbox boolean
       }}
       className="book-details-edit-form"
     >
       <div className="book-edit-layout">
+        {/* LEFT SIDE */}
         <div className="book-edit-left">
+
           <Form.Item
             label="Book Title"
             name="title"
@@ -165,23 +180,21 @@ export default function BookDetailsEditForm({ book, onSave, onCancelEdit }) {
             <Input.TextArea rows={2} />
           </Form.Item>
 
+          {/* ⭐ CHECKBOX STATUS */}
           <Form.Item
-            label="Status"
+            label="Inactive"
             name="status"
-            rules={[{ required: true, message: "Please select status." }]}
+            valuePropName="checked"
+            tooltip="Tick to mark this book as inactive"
           >
-            <Select>
-              <Option value="In Stock">In Stock</Option>
-              <Option value="Out of Stock">Out of Stock</Option>
-              <Option value="Inactive">Inactive</Option>
-            </Select>
+            <Checkbox>Mark this book as Inactive</Checkbox>
           </Form.Item>
 
           <Form.Item label="Created Date">
             <Input
               value={
-                book.createdAt
-                  ? new Date(book.createdAt).toLocaleDateString()
+                book.created_at
+                  ? new Date(book.created_at).toLocaleDateString()
                   : "Not available"
               }
               disabled
@@ -189,8 +202,10 @@ export default function BookDetailsEditForm({ book, onSave, onCancelEdit }) {
           </Form.Item>
         </div>
 
+        {/* RIGHT SIDE */}
         <div className="book-edit-right">
           <p className="cover-label">Cover Image</p>
+
           <Image
             src={previewUrl || "https://placehold.co/200x250"}
             alt="preview"
@@ -199,6 +214,7 @@ export default function BookDetailsEditForm({ book, onSave, onCancelEdit }) {
             className="cover-preview"
             preview={false}
           />
+
           <Upload
             beforeUpload={beforeUpload}
             fileList={fileList}

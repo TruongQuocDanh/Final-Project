@@ -126,7 +126,9 @@ export async function createBookHandler(req, res, next) {
       author_id: author_id ? Number(author_id) : null,
       category_id: category_id ? Number(category_id) : null,
     });
-    res.status(201).json(book);
+    // fetch full book with joined author_name and category_name
+    const fullBook = await getBookById(book.id);
+    res.status(201).json(fullBook);
   } catch (err) {
     next(err);
   }
@@ -159,7 +161,9 @@ export async function updateBookHandler(req, res, next) {
       return res.status(404).json({ message: "Book not found" });
     }
 
-    res.json(book);
+    // fetch full book with joined author_name and category_name
+    const fullBook = await getBookById(book.id);
+    res.json(fullBook);
   } catch (err) {
     next(err);
   }

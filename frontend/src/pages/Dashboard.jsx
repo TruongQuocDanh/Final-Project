@@ -88,15 +88,26 @@ export default function Dashboard() {
       formData.append("status", updatedBook.status || "In Stock");
       formData.append("author_id", updatedBook.author_id || "");
       formData.append("category_id", updatedBook.category_id || "");
-      if (updatedBook.imageFile) formData.append("image", updatedBook.imageFile);
 
-      await updateBook(updatedBook.id, formData);
-      message.success("Book updated successfully!");
+      if (updatedBook.imageFile) {
+        formData.append("image", updatedBook.imageFile);
+      }
+
+      // 🟢 GỌI API VÀ NHẬN LẠI BOOK SAU KHI UPDATE
+      const updated = await updateBook(updatedBook.id, formData);
+
+      // 🟢 REFRESH LIST
       fetchBooks();
+
+      // 🟢 RETURN updated book về modal
+      return updated;
+
     } catch (err) {
       message.error("Failed to update book!");
+      return null; // Modal sẽ hiểu update fail
     }
   };
+
 
   // 🟢 Delete book
   const handleDeleteBook = async (bookToDelete) => {
