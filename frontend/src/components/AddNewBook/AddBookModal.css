@@ -1,0 +1,185 @@
+/* Modal container */
+.add-book-modal .ant-modal-content {
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.add-book-container {
+  padding: 28px 36px;
+}
+
+/* Title */
+.modal-title {
+  text-align: center;
+  font-weight: 700;
+  font-size: 22px;
+  margin-bottom: 30px;
+  color: #111;
+  letter-spacing: 0.5px;
+}
+
+/* Form labels */
+.add-book-form .ant-form-item-label > label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+/* Inputs */
+.add-book-form .ant-input,
+.add-book-form .ant-select-selector,
+.add-book-form textarea {
+  border-radius: 6px !important;
+  border: 1px solid #ccc;
+  transition: all 0.2s ease;
+}
+
+.add-book-form .ant-input:focus,
+.add-book-form .ant-select-focused .ant-select-selector {
+  border-color: #0056d2 !important;
+  box-shadow: 0 0 0 2px rgba(0, 86, 210, 0.15);
+}
+
+/* Upload Section */
+.upload-section {
+  text-align: center;
+  padding-top: 10px;
+}
+
+.upload-title {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 10px;
+  color: #222;
+}
+
+.upload-box {
+  border: 2px dashed #cfcfcf;
+  border-radius: 10px;
+  padding: 20px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  transition: border-color 0.2s ease;
+}
+
+.upload-box:hover {
+  border-color: #0056d2;
+}
+
+.upload-placeholder {
+  color: #999;
+  font-size: 14px;
+}
+
+.upload-preview {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.upload-btn {
+  background-color: #f3f4f6 !important;
+  border-radius: 6px !important;
+  border: 1px solid #ccc !important;
+  color: #333 !important;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.upload-btn:hover {
+  background-color: #e8f0ff !important;
+  border-color: #0056d2 !important;
+  color: #0056d2 !important;
+}
+
+/* Footer Buttons */
+.modal-footer {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 30px;
+}
+
+/* Save Button */
+.save-btn {
+  background: #3b7d2e !important;
+  color: #fff !important;
+  width: 200px;
+  font-weight: 600;
+  border-radius: 6px !important;
+  padding: 14px 0 !important;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  border: none !important;
+}
+
+.save-btn:hover {
+  background: #2d6224 !important;
+}
+
+/* Clear Button */
+.clear-btn {
+  background: #f0f2f5 !important;
+  border-radius: 6px !important;
+  color: #333 !important;
+  border: 1px solid #ccc !important;
+  width: 200px;
+  font-weight: 600;
+  padding: 14px 0 !important;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.clear-btn:hover {
+  background: #e0e0e0 !important;
+}
+
+/* Cancel Button */
+.cancel-btn {
+  border-color: #d62828 !important;
+  color: #d62828 !important;
+  width: 200px;
+  font-weight: 600;
+  border-radius: 6px !important;
+  padding: 14px 0 !important;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.cancel-btn:hover {
+  background: #fff5f5 !important;
+}
+
+/* Validation error messages */
+.ant-form-item-explain-error {
+  font-size: 12px;
+  color: #d62828 !important;
+  margin-top: 2px;
+}
+
+/* Responsive layout */
+@media (max-width: 768px) {
+  .add-book-container {
+    padding: 20px;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .save-btn,
+  .clear-btn,
+  .cancel-btn {
+    width: 100%;
+  }
+}
