@@ -1,12 +1,5 @@
 import { useState, useEffect } from "react";
-import { useState, useEffect } from "react";
 import {
-  Layout,
-  Button,
-  Space,
-  message,
-  Pagination,
-  Spin,
   Layout,
   Button,
   Space,
@@ -18,22 +11,9 @@ import {
   PlusOutlined,
   MenuOutlined,
   CloseOutlined,
-  PlusOutlined,
-  MenuOutlined,
-  CloseOutlined,
 } from "@ant-design/icons";
 import Sidebar from "../components/SideBar";
 import BookList from "../components/BookList";
-import AddBookModal from "../components/AddNewBook/AddBookModal";
-import SearchFilterBar from "../components/SearchFilterBar";
-import BookDetailsModal from "../components/BookDetails/BookDetailsModal";
-
-import {
-  getBooks,
-  createBook,
-  updateBook,
-  deleteBook,
-} from "../api/bookApi";
 import AddBookModal from "../components/AddNewBook/AddBookModal";
 import SearchFilterBar from "../components/SearchFilterBar";
 import BookDetailsModal from "../components/BookDetails/BookDetailsModal";
@@ -53,19 +33,13 @@ export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [selectedBook, setSelectedBook] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [appliedFilters, setAppliedFilters] = useState(null);
-  const [appliedFilters, setAppliedFilters] = useState(null);
 
   const booksPerPage = 8;
 
-  // 🟢 Load all books từ backend (chỉ gọi 1 lần)
-  const fetchBooks = async () => {
-    try {
   // 🟢 Load all books từ backend (chỉ gọi 1 lần)
   const fetchBooks = async () => {
     try {
@@ -83,25 +57,10 @@ export default function Dashboard() {
   useEffect(() => {
     fetchBooks();
   }, []);
-      const data = await getBooks();
-      setBooks(data);
-    } catch (err) {
-      console.error(err);
-      message.error("Failed to load books from server!");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchBooks();
-  }, []);
 
   // 🟢 Add new book
   const handleAddBook = async (formData) => {
-  const handleAddBook = async (formData) => {
     try {
-      await createBook(formData);
       await createBook(formData);
       message.success("Book added successfully!");
       setIsModalOpen(false);
@@ -148,8 +107,6 @@ export default function Dashboard() {
       return null; // Modal sẽ hiểu update fail
     }
   };
-
-
   // 🟢 Delete book
   const handleDeleteBook = async (bookToDelete) => {
     try {
@@ -210,7 +167,6 @@ export default function Dashboard() {
   });
 
   const totalBooks = filteredBooks.length;
-  const totalBooks = filteredBooks.length;
   const startIndex = (currentPage - 1) * booksPerPage;
   const currentBooks = filteredBooks.slice(startIndex, startIndex + booksPerPage);
 
@@ -218,9 +174,7 @@ export default function Dashboard() {
     <Layout style={{ minHeight: "100vh", background: "#eaf2ff" }}>
       <Sidebar collapsed={collapsed} />
 
-
       <Layout style={{ background: "#eaf2ff" }}>
-        {/* Header */}
         {/* Header */}
         <Header
           style={{
@@ -242,29 +196,13 @@ export default function Dashboard() {
                 marginRight: 10,
                 marginTop: 20,
               }}
-              style={{
-                fontSize: "20px",
-                color: "#000",
-                marginRight: 10,
-                marginTop: 20,
-              }}
             />
-            <h1 style={{ fontSize: "22px", fontWeight: 700, margin: 0 }}>
-              List of Books
-            </h1>
             <h1 style={{ fontSize: "22px", fontWeight: 700, margin: 0 }}>
               List of Books
             </h1>
           </Space>
 
           <Space size="middle">
-            <SearchFilterBar
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              onSearchSubmit={() => setCurrentPage(1)}
-              onFilterApply={handleFilterApply}
-              onFilterClear={handleFilterClear}
-            />
             <SearchFilterBar
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
@@ -285,17 +223,8 @@ export default function Dashboard() {
         </Header>
 
         {/* Content */}
-        {/* Content */}
         <Content style={{ padding: "0 40px 40px", minHeight: "70vh" }}>
           {loading ? (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                height: "60vh",
-              }}
-            >
             <div
               style={{
                 display: "flex",
@@ -307,18 +236,6 @@ export default function Dashboard() {
               <Spin size="large" tip="Loading books..." />
             </div>
           ) : filteredBooks.length === 0 ? (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                height: "90vh",
-                fontSize: "20px",
-                color: "#666",
-                fontWeight: 500,
-              }}
-            >
-              No books found.
             <div
               style={{
                 display: "flex",
@@ -343,20 +260,10 @@ export default function Dashboard() {
                   marginTop: 30,
                 }}
               >
-              <BookList books={currentBooks} onViewBook={handleViewBook} />
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginTop: 30,
-                }}
-              >
                 <Pagination
                   current={currentPage}
                   total={totalBooks}
                   pageSize={booksPerPage}
-                  onChange={(page) => setCurrentPage(page)}
                   onChange={(page) => setCurrentPage(page)}
                   showSizeChanger={false}
                 />
@@ -366,7 +273,6 @@ export default function Dashboard() {
         </Content>
 
         {/* Modals */}
-        {/* Modals */}
         <AddBookModal
           open={isModalOpen}
           onCancel={() => setIsModalOpen(false)}
@@ -374,11 +280,6 @@ export default function Dashboard() {
         />
 
         <BookDetailsModal
-          open={isDetailsOpen}
-          onCancel={() => setIsDetailsOpen(false)}
-          book={selectedBook}
-          onSave={handleUpdateBook}
-          onDelete={handleDeleteBook}
           open={isDetailsOpen}
           onCancel={() => setIsDetailsOpen(false)}
           book={selectedBook}
